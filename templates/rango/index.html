@@ -20,6 +20,16 @@
         <strong>No categories at present.</strong>
     {% endif %}
 
+    {% if pages %}
+        <ul>
+            {% for page in pages %}
+            <li><a href="{{ page.url }}">{{ page.title }}</a></li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <strong>No pages at present.</strong>
+    {% endif %}
+
     <a href='/rango/about/'>About</a>
   </body>
 </html>
