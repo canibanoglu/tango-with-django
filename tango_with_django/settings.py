@@ -168,3 +168,5 @@ LOGGING = {
         },
     }
 }
+
+LOGIN_URL = '/rango/login'
