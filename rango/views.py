@@ -65,6 +65,7 @@ def category(request, category_name_url):
     # Go render the response and return it to the client.
     return render_to_response('rango/category.html', context_dict, context)
 
+@login_required
 def add_category(request):
     # Get the context from the request.
     context = RequestContext(request)
@@ -92,6 +93,7 @@ def add_category(request):
     # Render the form with error messages (if any).
     return render_to_response('rango/add_category.html', {'form': form}, context)
 
+@login_required
 def add_page(request, category_name_url):
     context = RequestContext(request)
 
@@ -207,8 +209,8 @@ def user_login(request):
             if user.is_active:
                 # If the account is valid and active, we can log the user in.
                 # We'll send the user back to the homepage.
-                login(request,user)
-                return HttpResponseRedirect('/rango')
+                login(request, user)
+                return HttpResponseRedirect('/rango/')
             else:
                 # An inactive account was usef - no loggin in!
                 return HttpResponse('Your Rango account is disabled.')
