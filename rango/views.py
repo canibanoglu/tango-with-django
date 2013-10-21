@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse
 from rango.models import Category, Page
 from rango.forms import CategoryForm, PageForm, UserForm, UserProfileForm
+from datetime import datetime
 
 def index(request):
     # Request the context of the request.
@@ -18,16 +19,42 @@ def index(request):
     category_list = Category.objects.order_by('-likes')[:5]
     context_dict = {'categories': category_list}
 
-    pages_list = Page.objects.order_by('-views')[:5]
-    context_dict['pages'] = pages_list
-
     # We loop through each category returned, and create a URL attribute.
     # This attribute stores an encoded URL (e.g. spaces replaced with underscores).
     for category in category_list:
         category.url = category.name.replace(' ',  '_')
 
-    # Render the response and send it back!
-    return render_to_response('rango/index.html', context_dict, context)
+
+    pages_list = Page.objects.order_by('-views')[:5]
+    context_dict['pages'] = pages_list
+
+    # Obtain our Response object early so we can add cookie information
+    response = render_to_response('rango/index.html', context_dict, context)
+
+    # Get the number of visits to the site.
+    # We use the COOKIES..get() function to obtain the visits cookie.
+    # If the cookie exists, the value returned is casted to an integer.
+    # If the cookie doesn't exist, we default to zero and cast that.
+    visits = int(request.COOKIES.get('visits', '0'))
+
+    # Does the cookie last_visit exist?
+    if 'last-visit' in request.COOKIES:
+        # Yes it does! Get the cookie's value.
+        last_visit = request.COOKIES['last_visit']
+        # Cast the value to a Python date/time object.
+        last_visit_time = datetime.strptime(last_visit[:-7], "%Y-%m-%d %H:%M:%S")
+
+        # If it's been more than a day since the last visit...
+        if (datetime.now() - last_visit_time).days > 0:
+            # ...reassign the value of the cookie to + 1 of what it was before
+            response.set_cookie('visits', visits + 1)
+            # ...and update the last visit cookie too.
+            response.set_cookie('last_visit', datetime.now())
+    else:
+        # Cookie last_visit doesn't exist, so create it and set it to the current date/time.
+        response.set_cookie('last_visit', datetime.now())
+    # Return response back to the user, updating any cookies that need to be changed.
+    return response
 
 def about(request):
     context = RequestContext(request)
