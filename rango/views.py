@@ -36,7 +36,7 @@ def index(request):
 
         if (datetime.now() - datetime.strptime(last_visit_time[:-7], "%Y-%m-%d %H:%M:%S")).days > 0:
             request.session['visits'] = visits + 1
-        request.session['last_visit'] = str(datetime.now())
+            request.session['last_visit'] = str(datetime.now())
     else:
         # The get returns None, and the session does not have a value for the last visit.
         request.session['last_visit'] = str(datetime.now())
