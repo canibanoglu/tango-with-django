@@ -28,37 +28,30 @@ def index(request):
     pages_list = Page.objects.order_by('-views')[:5]
     context_dict['pages'] = pages_list
 
-    # Obtain our Response object early so we can add cookie information
-    response = render_to_response('rango/index.html', context_dict, context)
+    if request.session.get('last_visit'):
+        print request.session.get('last_visit')
+        # The session has a value for the last visit
+        last_visit_time = request.session.get('last_visit')
+        visits = request.session.get('visits', 0)
 
-    # Get the number of visits to the site.
-    # We use the COOKIES..get() function to obtain the visits cookie.
-    # If the cookie exists, the value returned is casted to an integer.
-    # If the cookie doesn't exist, we default to zero and cast that.
-    visits = int(request.COOKIES.get('visits', '0'))
-
-    # Does the cookie last_visit exist?
-    if 'last-visit' in request.COOKIES:
-        # Yes it does! Get the cookie's value.
-        last_visit = request.COOKIES['last_visit']
-        # Cast the value to a Python date/time object.
-        last_visit_time = datetime.strptime(last_visit[:-7], "%Y-%m-%d %H:%M:%S")
-
-        # If it's been more than a day since the last visit...
-        if (datetime.now() - last_visit_time).days > 0:
-            # ...reassign the value of the cookie to + 1 of what it was before
-            response.set_cookie('visits', visits + 1)
-            # ...and update the last visit cookie too.
-            response.set_cookie('last_visit', datetime.now())
+        if (datetime.now() - datetime.strptime(last_visit_time[:-7], "%Y-%m-%d %H:%M:%S")).days > 0:
+            request.session['visits'] = visits + 1
+        request.session['last_visit'] = str(datetime.now())
     else:
-        # Cookie last_visit doesn't exist, so create it and set it to the current date/time.
-        response.set_cookie('last_visit', datetime.now())
-    # Return response back to the user, updating any cookies that need to be changed.
-    return response
+        # The get returns None, and the session does not have a value for the last visit.
+        request.session['last_visit'] = str(datetime.now())
+        request.session['visits'] = 1
+
+    # Render and return the rendered response back to the user.
+    return render_to_response('rango/index.html', context_dict, context)
 
 def about(request):
     context = RequestContext(request)
-    return render_to_response('rango/about.html', None, context)
+    if 'visits' in request.session:
+        visits = request.session['visits']
+    else:
+        visits = 0
+    return render_to_response('rango/about.html', {'visits': visits}, context)
 
 def category(request, category_name_url):
     context = RequestContext(request)
