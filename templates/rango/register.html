@@ -3,25 +3,39 @@
 {% block title %}Register{% endblock %}
 
 {% block body_block %}
-    <h1>Register with Rango</h1>
+    <div class="hero-unit">
+        <h1>Register with Rango</h1>
+        <br />
 
-    {% if registered %}
-        Rango says: <strong>Thank you for registering!</strong>
-        <a href="/rango/">Return to the homepage.</a><br />
-    {% else %}
-        Rango says: <strong>Register here!</strong>
+        <div class="container">
+            {% if registered %}
+            <p>Thank you for registering.</p>
 
-        <form id="user_form" method="post" action="/rango/register/" enctype="multipart/formdata">
-            {% csrf_token %}
+            <p><a href="/rango/login/">Login</a> when you are ready to rango.</p>
+            {% else %}
+            <form class="form-signin span8" id="user_form" method="post" action="/rango/register/"
+                enctype="multipart/form-data">
+                {% csrf_token %}
+                <h2 class="form-signin-heading">Sign up here</h2>
+                <!-- Display each form here -->
 
-            <!-- Display each form. The as.p method wraps each element in a paragraph
-                 (<p>) element. This ensres each element appears on a new line,
-                 making everything look neater. -->
-            {{ user_form.as_p }}
-            {{ profile_form.as_p }}
+                {% for field in user_form.visible_fields %}
+                {{ field.errors }}
+                {{ field.help_text }}<br />
+                {{ field }}<br/>
+                {% endfor %}
 
-            <!-- Provide a button to click to submit the form. -->
-            <input type="submit" name="submit" value="Register" />
-        </form>
-    {% endif %}
+                {% for field in profile_form.visible_fields %}
+                {{ field.errors }}
+                {{ field.help_text }}<br />
+                {{ field }}<br />
+                {% endfor %}
+
+                <br />
+                <!-- Provide a button to click to submit the form. -->
+                <button class="btn btn-primary" type="submit" name="submit">Register</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
 {% endblock %}
